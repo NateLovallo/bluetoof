@@ -11,7 +11,7 @@
 #include <string>
 
 ///////////////////////////////////////////////////////////////////////////////
-// Manager for interacting with bluez using an OO class
+// Manager for interacting with bluez over GDBus using an OO class
 //
 // This borrows heavily from:
 // https://www.linumiz.com/bluetooth-adapter-scan-for-new-devices-using-startdiscovery/
@@ -28,11 +28,11 @@ public:
 			g_print("FFFFFFF\n");
 			assert(false);
 		}
-
-		//mLoop = g_main_loop_new(NULL, FALSE);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
+	// blocks and sleeps be careful
+	// call from same thread you constructed the class in or glib will do you a heck
 	void Discover()
 	{
 		guint interfaceAdded = g_dbus_connection_signal_subscribe(
@@ -47,7 +47,6 @@ public:
 			this,
 			NULL);
 
-		unsigned int seconds = 0;
 		InvokeG("StartDiscovery");
 
 		for (int seconds = 0; seconds < 10; seconds++)
@@ -59,7 +58,7 @@ public:
 
 		g_dbus_connection_signal_unsubscribe(mConnection, interfaceAdded);
 		InvokeG("StopDiscovery");
-		printf("Found %u devices! in %u seconds\n", mDevices.size(), seconds);
+		printf("Found %u devices!\n", mDevices.size());
 
 	}
 
@@ -69,7 +68,11 @@ public:
 		g_object_unref(mConnection);
 	}
 
-
+	struct BtDevice
+	{
+		std::string Name;
+		std::string Address;
+	};
 
 private:
 
@@ -80,7 +83,7 @@ private:
 		GError* error = NULL;
 		g_dbus_connection_call_sync(mConnection,
 			"org.bluez",
-			"/org/bluez/hci0",
+			"/org/bluez/hci0", //TODO?
 			"org.bluez.Adapter1",
 			method,
 			NULL,
@@ -158,6 +161,9 @@ private:
 		{
 			if (g_strstr_len(g_ascii_strdown(interface_name, -1), -1, "device")) 
 			{
+
+				BtDevice newGuy;
+
 				g_print("[ %s ]\n", object);
 				const gchar* propertyName;
 				GVariantIter i;
@@ -166,11 +172,22 @@ private:
 				while (g_variant_iter_next(&i, "{&sv}", &propertyName, &propertyValue))
 				{ 
 					PropertyGetter(propertyName, propertyValue);
+
+					if (0 == g_strcmp0(propertyName,"Name"))
+					{
+						newGuy.Name.assign(g_variant_get_string(propertyValue, NULL));
+					}
+					else if (0 == g_strcmp0(propertyName, "Address"))
+					{
+						newGuy.Address.assign(g_variant_get_string(propertyValue, NULL));
+					}
+
+
 				}
 				g_variant_unref(propertyValue);
 
-
-				me->mDevices.push_back(std::string(object));
+				
+				me->mDevices.push_back(newGuy);
 			}
 
 			g_variant_unref(properties);
@@ -179,6 +196,5 @@ private:
 	}
 
 	GDBusConnection* mConnection = nullptr;
-	//GMainLoop* mLoop = ;
-	std::vector <std::string> mDevices;
+	std::vector <BtDevice> mDevices;
 };
