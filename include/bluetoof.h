@@ -16,6 +16,7 @@
 // This borrows heavily from:
 // https://www.linumiz.com/bluetooth-adapter-scan-for-new-devices-using-startdiscovery/
 // with my own OO sauce on top
+// Trying to add explanation as I go
 class BluetoothManager
 {
 public:
@@ -35,6 +36,8 @@ public:
 	// call from same thread you constructed the class in or glib will do you a heck
 	void Discover()
 	{
+		// https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces-objectmanager
+		// "The InterfacesAdded signal is emitted when either a new object is added or when an existing object gains one or more interfaces."
 		guint interfaceAdded = g_dbus_connection_signal_subscribe(
 			mConnection,
 			"org.bluez",
@@ -47,7 +50,7 @@ public:
 			this,
 			NULL);
 
-		InvokeG("StartDiscovery");
+		InvokeG("org.bluez.Adapter1", "StartDiscovery");
 
 		for (int seconds = 0; seconds < 10; seconds++)
 		{ 
@@ -57,9 +60,10 @@ public:
 		}
 
 		g_dbus_connection_signal_unsubscribe(mConnection, interfaceAdded);
-		InvokeG("StopDiscovery");
+		InvokeG("org.bluez.Adapter1", "StopDiscovery");
 		printf("Found %u devices!\n", mDevices.size());
 
+		// TODO take inventory here at the end thru introspection
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -77,14 +81,14 @@ public:
 private:
 
 	//////////////////////////////////////////////////////////////////////////////
-	bool InvokeG(const char* method)
+	bool InvokeG(const char* interface, const char* method)
 	{
 		bool retval = true;
 		GError* error = NULL;
 		g_dbus_connection_call_sync(mConnection,
 			"org.bluez",
 			"/org/bluez/hci0", //TODO?
-			"org.bluez.Adapter1",
+			interface,
 			method,
 			NULL,
 			NULL,
@@ -100,6 +104,13 @@ private:
 		}
 		return retval;
 	}
+
+	void FindDevices()
+	{
+		GVariantType* reply;
+		InvokeG("org.freedesktop.DBus.Introspectable.Introspect",NULL);
+	}
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	static void PropertyGetter(const gchar* key, GVariant* value)
@@ -156,6 +167,13 @@ private:
 		assert(userData != NULL);
 		BluetoothManager* me = static_cast<BluetoothManager*>(userData);
 
+		// best i can tell
+		// () = tuple
+		// & = pointer
+		// o = string
+		// a{ = dict, key = string, value = dict of variants
+		// From the spec
+		// DICT<STRING,DICT<STRING,VARIANT>>
 		g_variant_get(param, "(&oa{sa{sv}})", &object, &interfaces);
 		while (g_variant_iter_next(interfaces, "{&s@a{sv}}", &interface_name, &properties)) 
 		{
