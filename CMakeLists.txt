@@ -14,4 +14,4 @@ link_directories (${GLIB2_LIBRARY_DIRS} ${GIO_LIBRARY_DIRS})
 
 add_executable (bluetoof bluetoof.cpp)
 
-target_link_libraries (bluetoof LINK_PUBLIC bluetooth ${GLIB2_LIBRARIES} ${GIO_LIBRARIES})
+target_link_libraries (bluetoof LINK_PUBLIC ${GLIB2_LIBRARIES} ${GIO_LIBRARIES} glib-2.0 gio-2.0 m gobject-2.0)
