@@ -25,7 +25,28 @@ int main(int argc, char* args[])
         return 1;
     }
 
+	GVariant* result;
+	GError* error = NULL;
 
+	result = g_dbus_connection_call_sync(connection,
+		"org.bluez",
+		"/org/bluez/hci0",
+		"org.bluez.Adapter1",
+		"StartDiscovery",
+		NULL,
+		NULL,
+		G_DBUS_CALL_FLAGS_NONE,
+		-1,
+		NULL,
+		&error);
+
+	if (error != NULL)
+	{
+		printf("OH NO\n");
+	}
+
+	g_variant_unref(result);
+	return 0;
 
     g_object_unref(connection);
    
