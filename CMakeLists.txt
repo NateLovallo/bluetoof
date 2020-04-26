@@ -9,7 +9,7 @@ find_package (PkgConfig REQUIRED)
 pkg_check_modules (GLIB2 REQUIRED glib-2.0)
 pkg_check_modules (GIO REQUIRED glib-2.0)
 
-include_directories (${GLIB2_INCLUDE_DIRS} ${GIO_INCLUDE_DIRS})
+include_directories (${GLIB2_INCLUDE_DIRS} ${GIO_INCLUDE_DIRS} include)
 link_directories (${GLIB2_LIBRARY_DIRS} ${GIO_LIBRARY_DIRS})
 
 add_executable (bluetoof bluetoof.cpp)
