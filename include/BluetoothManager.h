@@ -29,6 +29,8 @@ public:
 			g_print("FFFFFFF\n");
 			assert(false);
 		}
+
+		FindDevices();
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -107,8 +109,59 @@ private:
 
 	void FindDevices()
 	{
-		GVariantType* reply;
-		InvokeG("org.freedesktop.DBus.Introspectable.Introspect",NULL);
+		GVariant* parameters = g_variant_new("(a{oa{sa{sv}}})");
+		GError* error;
+		g_dbus_connection_call_sync(
+			mConnection,
+			"org.bluez",
+			"/",
+			"org.freedesktop.DBus.ObjectManager",
+			"GetManagedObjects",
+			parameters,
+			G_VARIANT_TYPE("(a{oa{sa{sv}}})"),
+			G_DBUS_CALL_FLAGS_NONE,
+			-1,
+			NULL,
+			&error);
+
+		GVariant* result = NULL;
+		GVariantIter i;
+		const gchar* object_path;
+		GVariant* ifaces_and_properties;
+
+		if (parameters)
+		{
+			parameters = g_variant_get_child_value(parameters, 0);
+			g_variant_iter_init(&i, result);
+			while (g_variant_iter_next(&i, "{&o@a{sa{sv}}}", &object_path, &ifaces_and_properties)) 
+			{
+				const gchar* interface_name;
+				GVariant* properties;
+				GVariantIter ii;
+				g_variant_iter_init(&ii, ifaces_and_properties);
+				while (g_variant_iter_next(&ii, "{&s@a{sv}}", &interface_name, &properties)) {
+					if (g_strstr_len(g_ascii_strdown(interface_name, -1), -1, "device")) {
+						g_print("[ %s ]\n", object_path);
+						const gchar* property_name;
+						GVariantIter iii;
+						GVariant* prop_val;
+						g_variant_iter_init(&iii, properties);
+						/*
+						while (g_variant_iter_next(&iii, "{&sv}", &property_name, &prop_val))
+							bluez_property_value(property_name, prop_val);*/
+						g_variant_unref(prop_val);
+					}
+					g_variant_unref(properties);
+				}
+				g_variant_unref(ifaces_and_properties);
+			}
+			g_variant_unref(result);
+		}
+		
+
+
+
+
 	}
 
 
