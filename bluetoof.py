@@ -84,7 +84,26 @@ class Handler:
         mainloop.quit()
 
     def onButtonPressed(self, button):
-        print("Hello World!")
+        textLog.insert_at_cursor("HELLO\n")
+
+    def onNextClicked(self, button):
+        mpobj = bus.get_object("org.bluez", "/org/bluez/hci0/dev_84_B8_B8_83_B4_C4/player0")
+        mplayer = dbus.Interface(mpobj, 'org.bluez.MediaPlayer1')
+        mplayer.Next()
+        self.refreshInfo()
+
+    def onBackClicked(self, button):
+        mpobj = bus.get_object("org.bluez", "/org/bluez/hci0/dev_84_B8_B8_83_B4_C4/player0")
+        mplayer = dbus.Interface(mpobj, 'org.bluez.MediaPlayer1')
+        mplayer.Previous()
+        self.refreshInfo()
+
+    def refreshInfo(self):
+        mpobj = bus.get_object("org.bluez", "/org/bluez/hci0/dev_84_B8_B8_83_B4_C4/player0")
+        mplayer = dbus.Interface(mpobj, 'org.bluez.MediaPlayer1')
+        info = mplayer.Track()
+        print(info)
+        
 
 if __name__ == '__main__':
 
@@ -115,30 +134,12 @@ if __name__ == '__main__':
 
     label = builder.get_object("myLabel")
     label.set_text('WTF')
+
+    textLog = builder.get_object("textbuffer1")
+
+    textLog.insert_at_cursor("HELLO\n")
     
     print("3")
-    #Gtk.main()
 
     mainloop = GLib.MainLoop()
     mainloop.run()
-
-
-    
-    '''
-    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-
-    bus = dbus.SystemBus()
-
-    agent = Agent(bus, AGENT_PATH)
-
-    obj = bus.get_object("org.bluez", "/org/bluez");
-    manager = dbus.Interface(obj, "org.bluez.AgentManager1")
-    manager.RegisterAgent(AGENT_PATH, "NoInputNoOutput")
-
-    print("A2DP Agent registered")
-
-    manager.RequestDefaultAgent(AGENT_PATH)
-
-    mainloop = GObject.MainLoop()
-    mainloop.run()
-    '''
