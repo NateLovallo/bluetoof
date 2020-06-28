@@ -134,15 +134,10 @@ if __name__ == '__main__':
     builder.add_from_file("gladeTest.glade")
     builder.connect_signals(Handler())
 
-    window = builder.get_object("myWindow")
+    window = builder.get_object("mediaWindow")
     window.show_all()
 
-    label = builder.get_object("myLabel")
-    label.set_text('WTF')
-
-    textLog = builder.get_object("textbuffer1")
-
-    textLog.insert_at_cursor("HELLO\n")
+    label = builder.get_object("infoLabel")
 
     mpObj = bus.get_object("org.bluez", "/org/bluez/hci0/dev_84_B8_B8_83_B4_C4/player0")
     mplayer = dbus.Interface(mpObj, 'org.bluez.MediaPlayer1')

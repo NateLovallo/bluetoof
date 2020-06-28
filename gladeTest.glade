@@ -7,8 +7,8 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkTextBuffer" id="textbuffer1"/>
-  <object class="GtkWindow" id="myWindow">
+  <object class="GtkListStore" id="liststore1"/>
+  <object class="GtkWindow" id="mediaWindow">
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
     <property name="default_width">800</property>
@@ -25,10 +25,12 @@
         <property name="column_homogeneous">True</property>
         <child>
           <object class="GtkButton" id="pauseButton">
-            <property name="label" translatable="yes">Pause</property>
+            <property name="label">gtk-media-pause</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="use_stock">True</property>
+            <property name="always_show_image">True</property>
             <signal name="clicked" handler="onPauseClicked" swapped="no"/>
           </object>
           <packing>
@@ -37,10 +39,14 @@
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="myLabel">
+          <object class="GtkLabel" id="infoLabel">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="halign">center</property>
+            <property name="valign">center</property>
             <property name="label" translatable="yes">LABEL</property>
+            <property name="justify">center</property>
+            <property name="ellipsize">middle</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -48,26 +54,13 @@
           </packing>
         </child>
         <child>
-          <object class="GtkTextView" id="myTextView">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="vadjustment">adjustment1</property>
-            <property name="editable">False</property>
-            <property name="cursor_visible">False</property>
-            <property name="buffer">textbuffer1</property>
-            <property name="monospace">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkButton" id="nextButton">
-            <property name="label" translatable="yes">&gt;</property>
+            <property name="label">gtk-media-next</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="use_stock">True</property>
+            <property name="always_show_image">True</property>
             <signal name="clicked" handler="onNextClicked" swapped="no"/>
           </object>
           <packing>
@@ -77,10 +70,12 @@
         </child>
         <child>
           <object class="GtkButton" id="backButton">
-            <property name="label" translatable="yes">&lt;</property>
+            <property name="label">gtk-media-previous</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="use_stock">True</property>
+            <property name="always_show_image">True</property>
             <signal name="clicked" handler="onBackClicked" swapped="no"/>
           </object>
           <packing>
@@ -90,15 +85,31 @@
         </child>
         <child>
           <object class="GtkButton" id="playButton">
-            <property name="label" translatable="yes">Play</property>
+            <property name="label">gtk-media-play</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="use_stock">True</property>
+            <property name="always_show_image">True</property>
             <signal name="clicked" handler="onPlayClicked" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">1</property>
             <property name="top_attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTreeView">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="model">liststore1</property>
+            <child internal-child="selection">
+              <object class="GtkTreeSelection"/>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">2</property>
+            <property name="top_attach">0</property>
           </packing>
         </child>
         <child>
@@ -113,4 +124,5 @@
       </object>
     </child>
   </object>
+  <object class="GtkTextBuffer" id="textbuffer1"/>
 </interface>
