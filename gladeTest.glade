@@ -24,12 +24,12 @@
         <property name="row_homogeneous">True</property>
         <property name="column_homogeneous">True</property>
         <child>
-          <object class="GtkButton" id="myButton">
-            <property name="label" translatable="yes">Clickame</property>
+          <object class="GtkButton" id="pauseButton">
+            <property name="label" translatable="yes">Pause</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="clicked" handler="onButtonPressed" swapped="no"/>
+            <signal name="clicked" handler="onPauseClicked" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -58,8 +58,8 @@
             <property name="monospace">True</property>
           </object>
           <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">1</property>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
           </packing>
         </child>
         <child>
@@ -72,7 +72,7 @@
           </object>
           <packing>
             <property name="left_attach">2</property>
-            <property name="top_attach">2</property>
+            <property name="top_attach">1</property>
           </packing>
         </child>
         <child>
@@ -85,11 +85,21 @@
           </object>
           <packing>
             <property name="left_attach">0</property>
-            <property name="top_attach">2</property>
+            <property name="top_attach">1</property>
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkButton" id="playButton">
+            <property name="label" translatable="yes">Play</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <signal name="clicked" handler="onPlayClicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">1</property>
+          </packing>
         </child>
         <child>
           <placeholder/>

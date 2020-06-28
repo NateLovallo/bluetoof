@@ -83,30 +83,47 @@ class Handler:
     def onDestroy(self, *args):
         mainloop.quit()
 
-    def onButtonPressed(self, button):
-        textLog.insert_at_cursor("HELLO\n")
+    def onPlayClicked(self, button):
+        mplayer = dbus.Interface(mpObj, 'org.bluez.MediaPlayer1')
+        mplayer.Play()
+
+    def onPauseClicked(self, button):
+        mplayer = dbus.Interface(mpObj, 'org.bluez.MediaPlayer1')
+        mplayer.Pause()
 
     def onNextClicked(self, button):
-        mpobj = bus.get_object("org.bluez", "/org/bluez/hci0/dev_84_B8_B8_83_B4_C4/player0")
-        mplayer = dbus.Interface(mpobj, 'org.bluez.MediaPlayer1')
+        mplayer = dbus.Interface(mpObj, 'org.bluez.MediaPlayer1')
         mplayer.Next()
-        self.refreshInfo()
 
     def onBackClicked(self, button):
-        mpobj = bus.get_object("org.bluez", "/org/bluez/hci0/dev_84_B8_B8_83_B4_C4/player0")
-        mplayer = dbus.Interface(mpobj, 'org.bluez.MediaPlayer1')
+        mplayer = dbus.Interface(mpObj, 'org.bluez.MediaPlayer1')
         mplayer.Previous()
-        self.refreshInfo()
 
-    def refreshInfo(self):
-        mpobj = bus.get_object("org.bluez", "/org/bluez/hci0/dev_84_B8_B8_83_B4_C4/player0")
-        mplayer = dbus.Interface(mpobj, 'org.bluez.MediaPlayer1')
-        info = mplayer.Track()
-        print(info)
-        
+def device_property_changed(interface, properties, invalidated, path):
+    if interface == 'org.bluez.MediaPlayer1' and path == '/org/bluez/hci0/dev_84_B8_B8_83_B4_C4/player0':
+        #for x in properties:
+        #   print(x)
+        #    for y in x:
+        #        print('   ' + y)
+        #print()
+        #track = properties.Get('org.bluez.MediaPlayer1', 'Track')
+        #track = properties['Track']
+
+        props = dbus.Interface(mpObj, 'org.freedesktop.DBus.Properties')
+        print(props)
+        track = props.Get('org.bluez.MediaPlayer1', 'Track')
+        print(track)
+        #print(track['Title'])
+
+
+        #print(properties['Track'])
+        #labelText = properties['Track'] + '\n'
+        #label.set_text(labelText)
+
+
 
 if __name__ == '__main__':
-
+    ###########################################################################
     # bluetooth setup
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     bus = dbus.SystemBus()
@@ -121,14 +138,12 @@ if __name__ == '__main__':
 
     manager.RequestDefaultAgent(AGENT_PATH)
 
-
+    ###########################################################################
     # window setup
-    print("1")
     builder = Gtk.Builder()
     builder.add_from_file("gladeTest.glade")
     builder.connect_signals(Handler())
 
-    print("2")
     window = builder.get_object("myWindow")
     window.show_all()
 
@@ -138,8 +153,27 @@ if __name__ == '__main__':
     textLog = builder.get_object("textbuffer1")
 
     textLog.insert_at_cursor("HELLO\n")
-    
-    print("3")
+
+    ###########################################################################
+    mpObj = bus.get_object("org.bluez", "/org/bluez/hci0/dev_84_B8_B8_83_B4_C4/player0")
+    mplayer = dbus.Interface(mpObj, 'org.bluez.MediaPlayer1')
+
+
+    bus.add_signal_receiver(
+        device_property_changed,
+        bus_name='org.bluez',
+        signal_name='PropertiesChanged',
+        dbus_interface='org.freedesktop.DBus.Properties',
+        path_keyword='path'
+        )
+
+
+
+
+
+
+
+
 
     mainloop = GLib.MainLoop()
     mainloop.run()
