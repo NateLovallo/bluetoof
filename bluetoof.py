@@ -101,29 +101,20 @@ class Handler:
 
 def device_property_changed(interface, properties, invalidated, path):
     if interface == 'org.bluez.MediaPlayer1' and path == '/org/bluez/hci0/dev_84_B8_B8_83_B4_C4/player0':
-        #for x in properties:
-        #   print(x)
-        #    for y in x:
-        #        print('   ' + y)
-        #print()
-        #track = properties.Get('org.bluez.MediaPlayer1', 'Track')
-        #track = properties['Track']
+        if 'Track' in properties:
+            populateTrackInfo(properties['Track'])
 
+
+def populateTrackInfo(trackDict = None):
+    if trackDict == None:
         props = dbus.Interface(mpObj, 'org.freedesktop.DBus.Properties')
-        print(props)
-        track = props.Get('org.bluez.MediaPlayer1', 'Track')
-        print(track)
-        #print(track['Title'])
-
-
-        #print(properties['Track'])
-        #labelText = properties['Track'] + '\n'
-        #label.set_text(labelText)
-
-
+        trackDict = props.Get('org.bluez.MediaPlayer1', 'Track')
+    labelText = trackDict['Artist'] + '\n'
+    labelText += trackDict['Title'] + '\n'
+    labelText += trackDict['Album'] + '\n'
+    label.set_text(labelText)
 
 if __name__ == '__main__':
-    ###########################################################################
     # bluetooth setup
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     bus = dbus.SystemBus()
@@ -138,7 +129,6 @@ if __name__ == '__main__':
 
     manager.RequestDefaultAgent(AGENT_PATH)
 
-    ###########################################################################
     # window setup
     builder = Gtk.Builder()
     builder.add_from_file("gladeTest.glade")
@@ -154,10 +144,10 @@ if __name__ == '__main__':
 
     textLog.insert_at_cursor("HELLO\n")
 
-    ###########################################################################
     mpObj = bus.get_object("org.bluez", "/org/bluez/hci0/dev_84_B8_B8_83_B4_C4/player0")
     mplayer = dbus.Interface(mpObj, 'org.bluez.MediaPlayer1')
 
+    populateTrackInfo()
 
     bus.add_signal_receiver(
         device_property_changed,
@@ -166,13 +156,6 @@ if __name__ == '__main__':
         dbus_interface='org.freedesktop.DBus.Properties',
         path_keyword='path'
         )
-
-
-
-
-
-
-
 
 
     mainloop = GLib.MainLoop()
